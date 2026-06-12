@@ -1,0 +1,271 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: #080808;
+    color: #f0ece4;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  ::selection { background: rgba(201,168,76,.3); }
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: #080808; }
+  ::-webkit-scrollbar-thumb { background: #c9a84c; border-radius: 2px; }
+}
+
+@layer components {
+
+  /* ── NAVBAR ── */
+  .dm-nav {
+    @apply fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 md:px-10 py-4;
+    background: linear-gradient(to bottom, rgba(8,8,8,0.98) 0%, rgba(8,8,8,0) 100%);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: background 0.3s;
+  }
+  .dm-nav.scrolled {
+    background: rgba(8,8,8,0.97);
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+  }
+  .dm-logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.2em;
+    color: #c9a84c;
+    text-transform: uppercase;
+  }
+  .dm-nav-link {
+    @apply text-[10px] tracking-[0.22em] uppercase font-medium;
+    color: rgba(240,236,228,0.6);
+    transition: color 0.25s;
+  }
+  .dm-nav-link:hover { color: #c9a84c; }
+
+  /* ── HERO ── */
+  .dm-hero {
+    @apply relative min-h-screen flex flex-col items-center justify-center overflow-hidden;
+    background: radial-gradient(ellipse at 25% 45%, rgba(201,168,76,0.07) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 20%, rgba(201,168,76,0.04) 0%, transparent 50%),
+                #080808;
+  }
+
+  /* ── SECTION ── */
+  .dm-section { @apply py-20 px-5 md:px-10 lg:px-20; }
+  .dm-eyebrow {
+    @apply text-[9px] tracking-[0.45em] uppercase font-semibold;
+    color: #c9a84c;
+  }
+  .dm-section-title {
+    @apply font-serif text-3xl md:text-4xl lg:text-5xl font-light leading-tight;
+  }
+  .dm-section-title em { font-style: italic; color: #c9a84c; }
+
+  /* ── CARDS ── */
+  .dm-card {
+    @apply relative overflow-hidden;
+    background: #141414;
+    border: 1px solid #1e1e1e;
+    transition: border-color 0.35s, transform 0.35s;
+  }
+  .dm-card:hover { border-color: rgba(201,168,76,0.5); transform: translateY(-4px); }
+  .dm-card-img {
+    @apply w-full object-cover;
+    aspect-ratio: 3/4;
+    display: block;
+    transition: transform 0.45s, filter 0.45s;
+    filter: brightness(0.9);
+  }
+  .dm-card:hover .dm-card-img { transform: scale(1.04); filter: brightness(1); }
+
+  /* ── BUTTONS ── */
+  .dm-btn {
+    @apply inline-flex items-center justify-center gap-2 px-7 py-3;
+    @apply text-[10px] tracking-[0.22em] uppercase font-semibold;
+    background: linear-gradient(135deg, #c9a84c, #e8c97a);
+    color: #080808;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.25s, transform 0.2s;
+  }
+  .dm-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .dm-btn:active { transform: scale(0.98); }
+  .dm-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .dm-btn-outline {
+    @apply inline-flex items-center justify-center gap-2 px-7 py-3;
+    @apply text-[10px] tracking-[0.22em] uppercase font-semibold;
+    border: 1px solid #c9a84c;
+    color: #c9a84c;
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.25s, color 0.25s;
+  }
+  .dm-btn-outline:hover { background: #c9a84c; color: #080808; }
+
+  .dm-btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5;
+    @apply text-[10px] tracking-[0.18em] uppercase;
+    border: 1px solid #1e1e1e;
+    color: #f0ece4;
+    background: transparent;
+    cursor: pointer;
+    transition: border-color 0.25s, color 0.25s;
+  }
+  .dm-btn-ghost:hover { border-color: #c9a84c; color: #c9a84c; }
+
+  /* ── GOLD DIVIDER ── */
+  .dm-divider {
+    @apply w-12 h-px my-3;
+    background: linear-gradient(to right, transparent, #c9a84c, transparent);
+  }
+
+  /* ── SIZE BUTTONS ── */
+  .dm-size {
+    @apply text-[10px] font-medium px-2.5 py-1.5 border cursor-pointer;
+    border-color: #1e1e1e;
+    color: #666;
+    background: transparent;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+  .dm-size:hover, .dm-size.active { border-color: #c9a84c; color: #c9a84c; }
+
+  /* ── BADGE ── */
+  .dm-badge-new {
+    @apply absolute top-3 left-3 text-[8px] tracking-widest uppercase px-2 py-1 font-bold;
+    background: #c9a84c;
+    color: #080808;
+  }
+  .dm-badge-off {
+    @apply absolute top-3 right-3 text-[8px] tracking-widest uppercase px-2 py-1 font-bold;
+    background: #e05252;
+    color: #fff;
+  }
+
+  /* ── MARQUEE ── */
+  .dm-marquee { @apply overflow-hidden; border-top: 1px solid #1a1a1a; border-bottom: 1px solid #1a1a1a; background: #0c0c0c; }
+  .dm-marquee-track { display: flex; width: max-content; animation: marquee 28s linear infinite; }
+  .dm-marquee-item {
+    @apply flex items-center gap-5 px-6 py-4;
+    @apply text-[9px] tracking-[0.35em] uppercase whitespace-nowrap;
+    color: #444;
+  }
+  .dm-marquee-dot { color: #c9a84c; }
+
+  /* ── CART DRAWER ── */
+  .dm-drawer {
+    @apply fixed top-0 right-0 h-full flex flex-col z-50;
+    width: min(420px, 100vw);
+    background: #0f0f0f;
+    border-left: 1px solid #1e1e1e;
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .dm-drawer.open { transform: translateX(0); }
+
+  /* ── OVERLAY ── */
+  .dm-overlay {
+    @apply fixed inset-0 z-40 opacity-0 pointer-events-none;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(4px);
+    transition: opacity 0.35s;
+  }
+  .dm-overlay.open { opacity: 1; pointer-events: all; }
+
+  /* ── FORM ── */
+  .dm-label { @apply block text-[9px] tracking-[0.2em] uppercase text-dm-muted mb-1.5; }
+  .dm-input {
+    @apply w-full px-4 py-3 text-sm bg-dm-dark border text-dm-white placeholder-dm-muted;
+    border-color: #1e1e1e;
+    outline: none;
+    font-family: inherit;
+    -webkit-appearance: none;
+    transition: border-color 0.2s;
+  }
+  .dm-input:focus { border-color: #c9a84c; }
+
+  /* ── ADMIN ── */
+  .dm-admin-sidebar {
+    @apply fixed top-0 left-0 h-full flex flex-col z-30;
+    width: 230px;
+    background: #0a0a0a;
+    border-right: 1px solid #1a1a1a;
+  }
+  .dm-admin-content {
+    @apply min-h-screen;
+    margin-left: 230px;
+    background: #080808;
+    padding: 2rem;
+  }
+  .dm-admin-nav-item {
+    @apply flex items-center gap-3 px-5 py-3.5 text-[11px] tracking-wide w-full text-left;
+    color: rgba(240,236,228,0.45);
+    border-right: 2px solid transparent;
+    background: transparent;
+    border-bottom: none;
+    border-top: none;
+    border-left: none;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+  }
+  .dm-admin-nav-item:hover { color: #f0ece4; background: rgba(255,255,255,0.03); }
+  .dm-admin-nav-item.active { color: #c9a84c; background: rgba(201,168,76,0.08); border-right-color: #c9a84c; }
+  .dm-admin-card {
+    @apply p-5 md:p-6;
+    background: #141414;
+    border: 1px solid #1e1e1e;
+  }
+
+  /* ── STAT CARD ── */
+  .dm-stat { @apply dm-admin-card; }
+  .dm-stat-label { @apply text-[9px] tracking-[0.2em] uppercase text-dm-muted mb-2; }
+  .dm-stat-value { @apply text-2xl font-semibold; }
+
+  /* ── STATUS BADGE ── */
+  .dm-status {
+    @apply text-[9px] tracking-[0.1em] uppercase px-2.5 py-1 border font-medium;
+  }
+  .dm-status.pending   { background: rgba(250,204,21,0.07); color: #facc15; border-color: #7c5e00; }
+  .dm-status.confirmed { background: rgba(96,165,250,0.07); color: #60a5fa; border-color: #1e3a5f; }
+  .dm-status.shipped   { background: rgba(167,139,250,0.07); color: #a78bfa; border-color: #3b2e6e; }
+  .dm-status.delivered { background: rgba(74,222,128,0.07); color: #4ade80; border-color: #14532d; }
+  .dm-status.cancelled { background: rgba(248,113,113,0.07); color: #f87171; border-color: #7f1d1d; }
+
+  /* ── TABLE ── */
+  .dm-table { @apply w-full text-sm border-collapse; }
+  .dm-table th {
+    @apply text-left px-4 py-3 text-[9px] tracking-[0.2em] uppercase font-normal;
+    color: #666;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  .dm-table td {
+    @apply px-4 py-3;
+    border-bottom: 1px solid rgba(30,30,30,0.6);
+    vertical-align: middle;
+  }
+  .dm-table tr:last-child td { border-bottom: none; }
+  .dm-table tr:hover td { background: rgba(255,255,255,0.015); }
+
+  /* ── MOBILE ADMIN ── */
+  @media (max-width: 767px) {
+    .dm-admin-sidebar { display: none; }
+    .dm-admin-content { margin-left: 0; padding: 1rem; }
+    .dm-mobile-menu-open .dm-admin-sidebar { display: flex; width: 100%; z-index: 60; }
+  }
+}
+
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Prevent iOS zoom on input focus */
+@media (max-width: 768px) {
+  input, select, textarea { font-size: 16px !important; }
+}
