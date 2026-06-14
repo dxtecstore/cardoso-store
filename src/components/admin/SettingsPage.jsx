@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Save } from 'lucide-react'
 import { setSettings } from '../../lib/settings'
 import { useSettings } from '../../context/SettingsContext'
@@ -11,11 +11,14 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false)
 
   // Sync form when settings load for first time
-  const [synced, setSynced] = useState(false)
-  if (!synced && settings.store_name !== 'Cardoso Store') {
+  const [initialized, setInitialized] = useState(false)
+
+useEffect(() => {
+  if (!initialized && settings) {
     setForm({ ...settings })
-    setSynced(true)
+    setInitialized(true)
   }
+}, [settings, initialized])
 
   function handleChange(e) {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }))
