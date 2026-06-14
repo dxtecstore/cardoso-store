@@ -1,16 +1,18 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl  = import.meta.env.VITE_SUPABASE_URL
-const supabaseKey  = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseKey) {
-  console.warn(
-    '[Cardoso Store] Variáveis VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY não configuradas.\n' +
-    'Copie .env.example para .env e preencha com seus dados do Supabase.'
+  throw new Error(
+    '[Cardoso Store] Configure VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY antes de iniciar a aplicacao.'
   )
 }
 
-export const supabase = createClient(
-  supabaseUrl  || 'https://placeholder.supabase.co',
-  supabaseKey  || 'placeholder'
-)
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+  },
+})

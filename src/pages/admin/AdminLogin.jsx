@@ -1,23 +1,30 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { useAdmin }    from '../../context/AdminContext'
+import { useAdmin } from '../../context/AdminContext'
 import { Eye, EyeOff } from 'lucide-react'
 
 export default function AdminLogin() {
-  const { login, isAdmin } = useAdmin()
+  const { login, isAdmin, loading } = useAdmin()
   const navigate = useNavigate()
-  const [pw,    setPw]    = useState('')
-  const [show,  setShow]  = useState(false)
+  const [email, setEmail] = useState('')
+  const [pw, setPw] = useState('')
+  const [show, setShow] = useState(false)
   const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
+  if (loading) return null
   if (isAdmin) return <Navigate to="/admin/dashboard" replace />
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    if (login(pw)) {
+    setSubmitting(true)
+    const result = await login(email, pw)
+    setSubmitting(false)
+
+    if (result.ok) {
       navigate('/admin/dashboard')
     } else {
-      setError('Senha incorreta')
+      setError(result.error)
       setPw('')
     }
   }
@@ -34,6 +41,19 @@ export default function AdminLogin() {
 
         <form onSubmit={handleSubmit} className="dm-admin-card space-y-5">
           <div>
+            <label className="dm-label">E-mail</label>
+            <input
+              type="email"
+              value={email}
+              onChange={e => { setEmail(e.target.value); setError('') }}
+              className="dm-input"
+              placeholder="admin@cardosostore.com"
+              autoComplete="username"
+              required
+            />
+          </div>
+
+          <div>
             <label className="dm-label">Senha de acesso</label>
             <div className="relative">
               <input
@@ -41,14 +61,15 @@ export default function AdminLogin() {
                 value={pw}
                 onChange={e => { setPw(e.target.value); setError('') }}
                 className="dm-input pr-10"
-                placeholder="••••••••"
-                autoFocus
+                placeholder="********"
                 autoComplete="current-password"
+                required
               />
               <button
                 type="button"
                 onClick={() => setShow(v => !v)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-dm-muted hover:text-dm-white transition-colors"
+                aria-label={show ? 'Ocultar senha' : 'Mostrar senha'}
               >
                 {show ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
@@ -56,7 +77,9 @@ export default function AdminLogin() {
             {error && <p className="text-red-400 text-[10px] mt-1">{error}</p>}
           </div>
 
-          <button type="submit" className="dm-btn w-full">Entrar</button>
+          <button type="submit" className="dm-btn w-full" disabled={submitting}>
+            {submitting ? 'Entrando...' : 'Entrar'}
+          </button>
         </form>
 
         <p className="text-center text-[10px] text-dm-muted mt-6">
@@ -66,5 +89,3 @@ export default function AdminLogin() {
     </div>
   )
 }
-
-

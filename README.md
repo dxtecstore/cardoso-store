@@ -96,11 +96,11 @@ Abra `.env` e preencha:
 VITE_SUPABASE_URL=https://xxxxxxxxxxxxx.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
-VITE_ADMIN_PASSWORD=suasenhaaqui
+VITE_SUPABASE_STORAGE_BUCKET=cardoso-images
 VITE_WHATSAPP_NUMBER=5585999999999
 ```
 
-> 🔐 **VITE_ADMIN_PASSWORD**: defina uma senha forte para o painel admin.  
+> O painel admin usa Supabase Auth. Crie o usuario em Authentication > Users e adicione o id dele em `admin_users`.
 > Troque `5585999999999` pelo seu número real (55 + DDD + número, sem espaços).
 
 ---
@@ -136,7 +136,7 @@ Abra [http://localhost:3000](http://localhost:3000)
 5. Adicione as mesmas variáveis do seu `.env`:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
-   - `VITE_ADMIN_PASSWORD`
+   - `VITE_SUPABASE_STORAGE_BUCKET`
    - `VITE_WHATSAPP_NUMBER`
 6. Vá em **Deploys → Trigger deploy** para aplicar as variáveis
 
@@ -166,7 +166,7 @@ O arquivo `netlify.toml` na raiz garante que as rotas do React funcionem correta
 5. Clique em **Environment Variables** e adicione:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
-   - `VITE_ADMIN_PASSWORD`
+   - `VITE_SUPABASE_STORAGE_BUCKET`
    - `VITE_WHATSAPP_NUMBER`
 6. Clique em **Deploy**
 
@@ -175,7 +175,7 @@ O arquivo `netlify.toml` na raiz garante que as rotas do React funcionem correta
 ## 9. Primeiros passos após publicar
 
 1. Acesse `seusite.com/admin`
-2. Entre com a senha que definiu em `VITE_ADMIN_PASSWORD`
+2. Entre com o e-mail e senha do usuario criado no Supabase Auth
 3. Vá em **Configurações** e preencha:
    - Nome da loja
    - Logo (faça upload)

@@ -1,27 +1,74 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
 
 const AdminContext = createContext(null)
 
 export function AdminProvider({ children }) {
-  const [isAdmin, setIsAdmin] = useState(
-    () => sessionStorage.getItem('dm_admin') === '1'
-  )
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [session, setSession] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'caio2026'
+  async function verifyAdmin(userSession) {
+    if (!userSession) {
+      setSession(null)
+      setIsAdmin(false)
+      return false
+    }
 
-  function login(password) {
-    const ok = password === ADMIN_PASSWORD
-    if (ok) { sessionStorage.setItem('dm_admin', '1'); setIsAdmin(true) }
+    const { data, error } = await supabase.rpc('is_admin')
+    const ok = !error && data === true
+
+    setSession(userSession)
+    setIsAdmin(ok)
+
+    if (!ok) {
+      await supabase.auth.signOut()
+    }
+
     return ok
   }
 
-  function logout() {
-    sessionStorage.removeItem('dm_admin')
+  useEffect(() => {
+    let active = true
+
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (!active) return
+      await verifyAdmin(data.session)
+      if (active) setLoading(false)
+    })
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      verifyAdmin(nextSession).finally(() => {
+        if (active) setLoading(false)
+      })
+    })
+
+    return () => {
+      active = false
+      listener.subscription.unsubscribe()
+    }
+  }, [])
+
+  async function login(email, password) {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) {
+      return { ok: false, error: 'Credenciais invalidas' }
+    }
+
+    const ok = await verifyAdmin(data.session)
+    return ok
+      ? { ok: true }
+      : { ok: false, error: 'Usuario sem permissao administrativa' }
+  }
+
+  async function logout() {
+    await supabase.auth.signOut()
+    setSession(null)
     setIsAdmin(false)
   }
 
   return (
-    <AdminContext.Provider value={{ isAdmin, login, logout }}>
+    <AdminContext.Provider value={{ isAdmin, session, loading, login, logout }}>
       {children}
     </AdminContext.Provider>
   )
