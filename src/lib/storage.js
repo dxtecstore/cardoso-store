@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 
-const DEFAULT_BUCKET = 'cardoso-images'
-const LEGACY_BUCKET = 'dantas-images'
+const DEFAULT_BUCKET = 'dantas-images'
+const LEGACY_BUCKET = 'cardoso-images'
 const BUCKETS = [import.meta.env.VITE_SUPABASE_STORAGE_BUCKET || DEFAULT_BUCKET, LEGACY_BUCKET]
 
 /**
