@@ -48,23 +48,37 @@ export default function CartDrawer() {
       await createOrder(orderData)
 
       // WhatsApp automático
-      const phone   = settings.whatsapp || import.meta.env.VITE_WHATSAPP_NUMBER || '5585999999999'
-      const lineItems = items
-        .map(i => `• ${i.product.title} (${i.size}) ×${i.qty} — R$ ${(i.product.price * i.qty).toFixed(2)}`)
-        .join('\n')
+      await createOrder(orderData)
 
-      const msg = [
-        `*Novo Pedido — ${settings.store_name || 'Cardoso Store'}*`,
-        '',
-        `*Nome:* ${form.name}`,
-        `*Telefone:* ${form.phone}`,
-        `*Endereço:* ${form.address}`,
-        '',
-        '*Itens:*',
-        lineItems,
-        '',
-        `*Total: R$ ${total.toFixed(2)}*`,
-      ].join('\n')
+// WhatsApp automático
+const phone = '5591983181896'
+
+const lineItems = items
+  .map(i => `• ${i.product.title} (${i.size}) x${i.qty} - R$ ${(i.product.price * i.qty).toFixed(2)}`)
+  .join('\n')
+
+const msg = [
+  `🛒 NOVO PEDIDO - ${settings.store_name || 'Cardoso Store'}`,
+  '',
+  `👤 Cliente: ${form.name}`,
+  `📞 Telefone: ${form.phone}`,
+  `📍 Endereço: ${form.address}`,
+  '',
+  '📦 ITENS:',
+  lineItems,
+  '',
+  `💰 TOTAL: R$ ${total.toFixed(2)}`,
+  '',
+  '⚠️ Envie o comprovante de pagamento nesta conversa para confirmação do pedido.'
+].join('\n')
+
+window.open(
+  `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,
+  '_blank'
+)
+
+clearCart()
+setStep(STEPS.SUCCESS)
 
       window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank')
 

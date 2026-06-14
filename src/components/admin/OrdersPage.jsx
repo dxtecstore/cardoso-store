@@ -5,11 +5,12 @@ import { useSettings } from '../../context/SettingsContext'
 import toast from 'react-hot-toast'
 
 const STATUSES = [
-  { key: 'pending',   label: 'Pendente'   },
-  { key: 'confirmed', label: 'Confirmado' },
-  { key: 'shipped',   label: 'Enviado'    },
-  { key: 'delivered', label: 'Entregue'   },
-  { key: 'cancelled', label: 'Cancelado'  },
+  { key: 'pending',    label: 'NOVO' },
+  { key: 'paid',       label: 'PAGO' },
+  { key: 'separating', label: 'SEPARANDO' },
+  { key: 'shipping',   label: 'A CAMINHO' },
+  { key: 'delivered',  label: 'ENTREGUE' },
+  { key: 'cancelled',  label: 'CANCELADO' },
 ]
 
 export default function OrdersPage() {
