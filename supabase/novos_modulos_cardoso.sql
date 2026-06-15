@@ -1,7 +1,7 @@
--- Cardoso Store - SQL operacional para novos módulos
+-- Cardoso Store - novos módulos administrativos
 -- Execute este arquivo no SQL Editor do Supabase.
--- Ele cria as novas tabelas de Financeiro/Estoque e corrige a política
--- necessária para o checkout registrar pedidos no painel.
+-- Ele cria apenas as novas tabelas de Financeiro/Estoque e corrige a política
+-- necessária para clientes conseguirem registrar pedidos no checkout.
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
@@ -75,6 +75,7 @@ DROP POLICY IF EXISTS "movimentacoes_estoque_admin_all" ON movimentacoes_estoque
 CREATE POLICY "movimentacoes_estoque_admin_select" ON movimentacoes_estoque FOR SELECT TO authenticated USING (true);
 CREATE POLICY "movimentacoes_estoque_admin_all" ON movimentacoes_estoque FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
+-- Correção necessária para o checkout: permite que visitantes registrem pedidos.
 DROP POLICY IF EXISTS "orders_insert_public" ON orders;
 CREATE POLICY "orders_insert_public"
   ON orders FOR INSERT

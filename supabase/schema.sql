@@ -200,3 +200,113 @@ ON CONFLICT (key) DO NOTHING;
 -- INSERT INTO public.admin_users (user_id)
 -- VALUES ('AUTH_USER_UUID_AQUI')
 -- ON CONFLICT DO NOTHING;
+
+-- -----------------------------------------------------------------------------
+-- Tabelas e políticas para Financeiro e Estoque
+-- -----------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS despesas (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  amount NUMERIC(12,2) NOT NULL,
+  category TEXT,
+  date DATE,
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS investimentos (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  amount NUMERIC(12,2) NOT NULL,
+  date DATE,
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS estoque (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+  available_qty INTEGER DEFAULT 0,
+  unit_cost NUMERIC(12,2) DEFAULT 0,
+  alert_threshold INTEGER DEFAULT 5,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS movimentacoes_estoque (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+  type TEXT NOT NULL,
+  qty INTEGER NOT NULL,
+  cost NUMERIC(12,2) DEFAULT 0,
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS despesas_date_idx ON despesas (date DESC);
+CREATE INDEX IF NOT EXISTS investimentos_date_idx ON investimentos (date DESC);
+CREATE INDEX IF NOT EXISTS estoque_product_idx ON estoque (product_id);
+CREATE INDEX IF NOT EXISTS movimentacoes_estoque_created_idx ON movimentacoes_estoque (created_at DESC);
+
+ALTER TABLE despesas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE investimentos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE estoque ENABLE ROW LEVEL SECURITY;
+ALTER TABLE movimentacoes_estoque ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "despesas_select_admin" ON despesas;
+DROP POLICY IF EXISTS "despesas_write_admin" ON despesas;
+
+CREATE POLICY "despesas_select_admin"
+  ON despesas FOR SELECT
+  TO authenticated
+  USING (public.is_admin());
+
+CREATE POLICY "despesas_write_admin"
+  ON despesas FOR ALL
+  TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "investimentos_select_admin" ON investimentos;
+DROP POLICY IF EXISTS "investimentos_write_admin" ON investimentos;
+
+CREATE POLICY "investimentos_select_admin"
+  ON investimentos FOR SELECT
+  TO authenticated
+  USING (public.is_admin());
+
+CREATE POLICY "investimentos_write_admin"
+  ON investimentos FOR ALL
+  TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "estoque_select_admin" ON estoque;
+DROP POLICY IF EXISTS "estoque_write_admin" ON estoque;
+
+CREATE POLICY "estoque_select_admin"
+  ON estoque FOR SELECT
+  TO authenticated
+  USING (public.is_admin());
+
+CREATE POLICY "estoque_write_admin"
+  ON estoque FOR ALL
+  TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
+
+DROP POLICY IF EXISTS "movimentacoes_select_admin" ON movimentacoes_estoque;
+DROP POLICY IF EXISTS "movimentacoes_write_admin" ON movimentacoes_estoque;
+
+CREATE POLICY "movimentacoes_select_admin"
+  ON movimentacoes_estoque FOR SELECT
+  TO authenticated
+  USING (public.is_admin());
+
+CREATE POLICY "movimentacoes_write_admin"
+  ON movimentacoes_estoque FOR ALL
+  TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
+

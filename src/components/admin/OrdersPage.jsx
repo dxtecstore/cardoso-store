@@ -5,25 +5,29 @@ import { useSettings } from '../../context/SettingsContext'
 import toast from 'react-hot-toast'
 
 const STATUSES = [
-  { key: 'pending',    label: 'NOVO' },
-  { key: 'paid',       label: 'PAGO' },
-  { key: 'separating', label: 'SEPARANDO' },
-  { key: 'shipping',   label: 'A CAMINHO' },
-  { key: 'delivered',  label: 'ENTREGUE' },
-  { key: 'cancelled',  label: 'CANCELADO' },
+  { key: 'pending', label: 'Pendente' },
+  { key: 'paid', label: 'Pago' },
+  { key: 'separating', label: 'Separando' },
+  { key: 'shipping', label: 'A caminho' },
+  { key: 'delivered', label: 'Entregue' },
+  { key: 'cancelled', label: 'Cancelado' },
 ]
 
 export default function OrdersPage() {
-  const [orders,  setOrders]  = useState([])
+  const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
-  const [open,    setOpen]    = useState(null)
+  const [open, setOpen] = useState(null)
   const { settings } = useSettings()
 
   async function load() {
     setLoading(true)
-    try { setOrders(await getOrders()) }
-    catch (e) { toast.error('Erro ao carregar pedidos: ' + e.message) }
-    finally { setLoading(false) }
+    try {
+      setOrders(await getOrders())
+    } catch (e) {
+      toast.error('Erro ao carregar pedidos: ' + e.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { load() }, [])
@@ -33,21 +37,27 @@ export default function OrdersPage() {
       await updateOrderStatus(id, status)
       setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o))
       toast.success('Status atualizado')
-    } catch (e) { toast.error(e.message) }
+    } catch (e) {
+      toast.error(e.message)
+    }
   }
 
   async function handleDelete(id) {
     if (!confirm('Excluir este pedido?')) return
-    try { await deleteOrder(id); await load(); toast.success('Pedido excluído') }
-    catch (e) { toast.error(e.message) }
+    try {
+      await deleteOrder(id)
+      await load()
+      toast.success('Pedido excluído')
+    } catch (e) {
+      toast.error(e.message)
+    }
   }
 
   function whatsappLink(order) {
-    const rawPhone = (order.customer_phone || '').replace(/\D/g, '')
-    const phone    = rawPhone || (settings.whatsapp || '')
-    const status   = STATUSES.find(s => s.key === order.status)?.label || order.status
-    const msg      = `Olá ${order.customer_name}! Seu pedido na ${settings.store_name || 'nossa loja'} está *${status}*. Obrigado!`
-    return `https://wa.me/${rawPhone || phone}?text=${encodeURIComponent(msg)}`
+    const phone = (order.customer_phone || settings.whatsapp || '').replace(/\D/g, '')
+    const status = STATUSES.find(s => s.key === order.status)?.label || order.status
+    const msg = `Olá ${order.customer_name}! Seu pedido na ${settings.store_name || 'nossa loja'} está ${status}. Obrigado!`
+    return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
   }
 
   return (
@@ -65,7 +75,6 @@ export default function OrdersPage() {
         <div className="space-y-3">
           {orders.map(order => (
             <div key={order.id} className="dm-admin-card">
-              {/* Summary row */}
               <div
                 className="flex items-center justify-between cursor-pointer select-none"
                 onClick={() => setOpen(open === order.id ? null : order.id)}
@@ -90,16 +99,14 @@ export default function OrdersPage() {
                 </div>
               </div>
 
-              {/* Expanded details */}
               {open === order.id && (
                 <div className="mt-4 pt-4 border-t border-dm-border/50 space-y-4">
-                  {/* Items */}
                   <div>
                     <p className="dm-label">Itens do pedido</p>
                     <div className="space-y-1">
                       {(Array.isArray(order.products) ? order.products : []).map((item, i) => (
                         <div key={i} className="flex justify-between text-[11px] text-dm-muted py-1 border-b border-dm-border/30 last:border-0">
-                          <span>{item.title} ({item.size}) ×{item.qty}</span>
+                          <span>{item.title} ({item.size}) x{item.qty}</span>
                           <span>R$ {(Number(item.price) * item.qty).toFixed(2)}</span>
                         </div>
                       ))}
@@ -110,15 +117,13 @@ export default function OrdersPage() {
                     </div>
                   </div>
 
-                  {/* Address */}
                   <div>
                     <p className="dm-label">Endereço de entrega</p>
                     <p className="text-[12px] text-dm-white/65">{order.customer_address}</p>
                   </div>
 
-                  {/* Change status */}
                   <div>
-                    <p className="dm-label">Alterar status</p>
+                    <p className="dm-label">Controle do pedido</p>
                     <div className="flex flex-wrap gap-2">
                       {STATUSES.map(s => (
                         <button
@@ -134,7 +139,6 @@ export default function OrdersPage() {
                     </div>
                   </div>
 
-                  {/* Actions */}
                   <div className="flex gap-3 flex-wrap">
                     <a
                       href={whatsappLink(order)}
