@@ -5,7 +5,8 @@ import { deleteImage } from '../../lib/storage'
 import ImageUpload from '../shared/ImageUpload'
 import toast from 'react-hot-toast'
 
-const AVAILABLE_SIZES = ['P', 'M', 'G', 'GG', 'XGG']
+const CLOTHING_SIZES = ['P', 'M', 'G', 'GG', 'XGG']
+const SHOE_SIZES = ['34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44']
 const BLANK = { title: '', description: '', price: '', price_wholesale: '', price_original: '', category: '', image_url: '', sizes: [], active: true }
 const CATEGORIES = ['Oversized', 'Polos Premium', 'Camisetas', 'Calças', 'Acessórios', 'Outros']
 
@@ -242,26 +243,18 @@ export default function ProductsPage() {
 
               <div>
                 <label className="dm-label">Tamanhos disponíveis *</label>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                  {AVAILABLE_SIZES.map(size => (
-                    <label
-                      key={size}
-                      className={`flex items-center justify-center gap-2 border px-3 py-2 text-[10px] font-medium cursor-pointer transition-colors ${
-                        form.sizes.includes(size)
-                          ? 'border-dm-gold text-dm-gold bg-dm-gold/10'
-                          : 'border-dm-border text-dm-muted hover:border-dm-gold/60 hover:text-dm-white'
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={form.sizes.includes(size)}
-                        onChange={() => handleSizeToggle(size)}
-                        className="w-3.5 h-3.5 accent-dm-gold"
-                      />
-                      {size}
-                    </label>
-                  ))}
-                </div>
+                <SizeGroup
+                  title="Roupas"
+                  sizes={CLOTHING_SIZES}
+                  selected={form.sizes}
+                  onToggle={handleSizeToggle}
+                />
+                <SizeGroup
+                  title="Calçados"
+                  sizes={SHOE_SIZES}
+                  selected={form.sizes}
+                  onToggle={handleSizeToggle}
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -304,6 +297,34 @@ export default function ProductsPage() {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function SizeGroup({ title, sizes, selected, onToggle }) {
+  return (
+    <div className="mt-3">
+      <p className="text-[10px] text-dm-muted mb-2">{title}</p>
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+        {sizes.map(size => (
+          <label
+            key={size}
+            className={`flex items-center justify-center gap-2 border px-3 py-2 text-[10px] font-medium cursor-pointer transition-colors ${
+              selected.includes(size)
+                ? 'border-dm-gold text-dm-gold bg-dm-gold/10'
+                : 'border-dm-border text-dm-muted hover:border-dm-gold/60 hover:text-dm-white'
+            }`}
+          >
+            <input
+              type="checkbox"
+              checked={selected.includes(size)}
+              onChange={() => onToggle(size)}
+              className="w-3.5 h-3.5 accent-dm-gold"
+            />
+            {size}
+          </label>
+        ))}
+      </div>
     </div>
   )
 }
