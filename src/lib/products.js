@@ -1,5 +1,58 @@
 import { supabase } from './supabase'
 
+const EXTRA_PREFIX = 'product_extra_'
+
+function splitProductPayload(product) {
+  const {
+    price_wholesale,
+    sizes,
+    ...base
+  } = product
+
+  const extras = {
+    price_wholesale: price_wholesale ?? null,
+    sizes: Array.isArray(sizes) ? sizes : [],
+  }
+
+  return { base, extras }
+}
+
+async function getProductExtras() {
+  const { data, error } = await supabase
+    .from('settings')
+    .select('key, value')
+    .like('key', `${EXTRA_PREFIX}%`)
+
+  if (error) return {}
+
+  return Object.fromEntries((data ?? []).map(row => {
+    try {
+      const id = row.key.replace(EXTRA_PREFIX, '')
+      return [id, JSON.parse(row.value || '{}')]
+    } catch (_) {
+      return [row.key.replace(EXTRA_PREFIX, ''), {}]
+    }
+  }))
+}
+
+function mergeProductExtras(products, extrasById) {
+  return (products ?? []).map(product => ({
+    ...product,
+    ...(extrasById[product.id] ?? {}),
+  }))
+}
+
+async function saveProductExtras(productId, extras) {
+  const { error } = await supabase
+    .from('settings')
+    .upsert({
+      key: `${EXTRA_PREFIX}${productId}`,
+      value: JSON.stringify(extras),
+    }, { onConflict: 'key' })
+
+  if (error) throw error
+}
+
 export async function getProducts() {
   const { data, error } = await supabase
     .from('products')
@@ -7,7 +60,8 @@ export async function getProducts() {
     .eq('active', true)
     .order('created_at', { ascending: false })
   if (error) throw error
-  return data ?? []
+  const extras = await getProductExtras()
+  return mergeProductExtras(data, extras)
 }
 
 export async function getAllProducts() {
@@ -16,31 +70,39 @@ export async function getAllProducts() {
     .select('*')
     .order('created_at', { ascending: false })
   if (error) throw error
-  return data ?? []
+  const extras = await getProductExtras()
+  return mergeProductExtras(data, extras)
 }
 
 export async function createProduct(product) {
+  const { base, extras } = splitProductPayload(product)
   const { data, error } = await supabase
     .from('products')
-    .insert([{ ...product, active: true }])
+    .insert([{ ...base, active: true }])
     .select()
     .single()
   if (error) throw error
-  return data
+
+  await saveProductExtras(data.id, extras)
+  return { ...data, ...extras }
 }
 
 export async function updateProduct(id, updates) {
+  const { base, extras } = splitProductPayload(updates)
   const { data, error } = await supabase
     .from('products')
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update({ ...base, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select()
     .single()
   if (error) throw error
-  return data
+
+  await saveProductExtras(id, extras)
+  return { ...data, ...extras }
 }
 
 export async function deleteProduct(id) {
   const { error } = await supabase.from('products').delete().eq('id', id)
   if (error) throw error
+  await supabase.from('settings').delete().eq('key', `${EXTRA_PREFIX}${id}`)
 }
