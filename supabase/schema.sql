@@ -8,9 +8,11 @@ CREATE TABLE IF NOT EXISTS products (
   title TEXT NOT NULL,
   description TEXT,
   price NUMERIC(10,2) NOT NULL,
+  price_wholesale NUMERIC(10,2),
   price_original NUMERIC(10,2),
   category TEXT,
   image_url TEXT,
+  sizes JSONB DEFAULT '[]'::jsonb,
   active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
@@ -309,4 +311,3 @@ CREATE POLICY "movimentacoes_write_admin"
   TO authenticated
   USING (public.is_admin())
   WITH CHECK (public.is_admin());
-

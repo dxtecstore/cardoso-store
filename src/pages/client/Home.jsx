@@ -5,6 +5,7 @@ import Catalog     from '../../components/client/Catalog'
 import About       from '../../components/client/About'
 import Footer      from '../../components/client/Footer'
 import CartDrawer  from '../../components/client/CartDrawer'
+import FloatingWhatsApp from '../../components/client/FloatingWhatsApp'
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
       <About />
       <Footer />
       <CartDrawer />
+      <FloatingWhatsApp />
     </div>
   )
 }

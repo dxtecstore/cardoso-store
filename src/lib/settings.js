@@ -36,7 +36,7 @@ export async function setSettings(pairs) {
 export const SETTINGS_DEFAULTS = {
   store_name:  'Cardoso Store',
   logo_url:    '',
-  whatsapp:    '5585999999999',
+  whatsapp:    '5591983181896',
   instagram:   'cardoso.store',
   hero_title:  'Vista Presença.',
   hero_sub:    'Moda premium multimarcas. Elegância em cada detalhe.',

@@ -25,23 +25,50 @@ export default function CartDrawer() {
   }
 
   function buildOwnerMessage() {
+    const storeName = settings.store_name || 'Cardoso Store'
+    const formatCurrency = value =>
+      new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }).format(Number(value) || 0)
+
     const lineItems = items
-      .map(i => `- ${i.product.title} (${i.size}) x${i.qty} - R$ ${(Number(i.product.price) * i.qty).toFixed(2)}`)
+      .map(i => {
+        const size = i.size ? ` (${i.size})` : ''
+        const itemTotal = Number(i.product.price) * i.qty
+        return `• ${i.product.title}${size} × ${i.qty} — ${formatCurrency(itemTotal)}`
+      })
       .join('\n')
 
     return [
-      `NOVO PEDIDO - ${settings.store_name || 'Cardoso Store'}`,
+      '🛒 *PEDIDO CONFIRMADO!*',
       '',
-      `Cliente: ${form.name.trim()}`,
-      `Telefone: ${form.phone.trim()}`,
-      `Endereco: ${form.address.trim()}`,
+      `Obrigado por comprar na *${storeName}*. Seu pedido já foi registrado em nosso sistema.`,
       '',
-      'ITENS:',
+      '📦 *Resumo do Pedido*',
+      '',
+      `👤 *Cliente:* ${form.name.trim()}`,
+      `📞 *Telefone:* ${form.phone.trim()}`,
+      '',
+      '📍 *Entrega:*',
+      form.address.trim(),
+      '',
+      '━━━━━━━━━━━━━━━',
+      '',
+      '📦 *Itens do Pedido:*',
       lineItems,
       '',
-      `TOTAL: R$ ${total.toFixed(2)}`,
+      '━━━━━━━━━━━━━━━',
       '',
-      'Pedido registrado no painel administrativo.',
+      `💳 *Total:* ${formatCurrency(total)}`,
+      '',
+      '✅ *Para concluir sua compra:*',
+      'Envie o comprovante de pagamento nesta conversa.',
+      '',
+      'Após a confirmação, seu pedido será separado e liberado para entrega.',
+      '',
+      '🙏 Agradecemos pela preferência!',
+      `*${storeName}*`,
     ].join('\n')
   }
 

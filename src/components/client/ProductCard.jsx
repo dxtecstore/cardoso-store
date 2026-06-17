@@ -15,6 +15,7 @@ export default function ProductCard({ product }) {
   const isNew   = Date.now() - new Date(product.created_at).getTime() < 14 * 86400_000
   const hasOff  = product.price_original && product.price_original > product.price
   const offPct  = hasOff ? Math.round((1 - product.price / product.price_original) * 100) : 0
+  const availableSizes = Array.isArray(product.sizes) && product.sizes.length > 0 ? product.sizes : SIZES
 
   async function handleAdd() {
     if (!size) { toast.error('Selecione um tamanho'); return }
@@ -24,8 +25,22 @@ export default function ProductCard({ product }) {
     setTimeout(() => setAdding(false), 600)
   }
 
-  const phone   = settings.whatsapp || import.meta.env.VITE_WHATSAPP_NUMBER || '5585999999999'
-  const waText  = encodeURIComponent(`Olá! Tenho interesse no produto: *${product.title}* — R$ ${Number(product.price).toFixed(2)}`)
+  const phone   = settings.whatsapp || import.meta.env.VITE_WHATSAPP_NUMBER || '5591983181896'
+  const price = Number(product.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+  const wholesalePrice = product.price_wholesale
+    ? Number(product.price_wholesale).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+    : null
+  const productDetails = [
+    'Olá! Tenho interesse neste modelo da Cardoso Store:',
+    '',
+    `*${product.title}*`,
+    product.category ? `Categoria: ${product.category}` : null,
+    size ? `Tamanho escolhido: ${size}` : null,
+    `Preço varejo: ${price}`,
+    wholesalePrice ? `Preço atacado: ${wholesalePrice}` : null,
+    product.description ? `Descrição: ${product.description}` : null,
+  ].filter(Boolean).join('\n')
+  const waText  = encodeURIComponent(productDetails)
   const waLink  = `https://wa.me/${phone}?text=${waText}`
 
   return (
@@ -34,7 +49,7 @@ export default function ProductCard({ product }) {
       {hasOff && <span className="dm-badge-off">-{offPct}%</span>}
 
       {/* Image */}
-      <div className="overflow-hidden">
+      <div className="relative overflow-hidden">
         {product.image_url ? (
           <img
             src={product.image_url}
@@ -47,6 +62,16 @@ export default function ProductCard({ product }) {
             <span className="text-dm-muted text-xs tracking-widest uppercase">Sem foto</span>
           </div>
         )}
+        <a
+          href={waLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={`Chamar no WhatsApp sobre ${product.title}`}
+          aria-label={`Chamar no WhatsApp sobre ${product.title}`}
+          className="absolute right-3 bottom-3 z-10 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-[0_10px_30px_rgba(37,211,102,0.45)] ring-1 ring-white/20 transition-all duration-300 hover:-translate-y-1 hover:scale-105 hover:bg-[#20bd5a] focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2 focus:ring-offset-dm-black"
+        >
+          <MessageCircle size={22} strokeWidth={2.4} />
+        </a>
       </div>
 
       {/* Info */}
@@ -64,9 +89,17 @@ export default function ProductCard({ product }) {
 
         {/* Price */}
         <div className="flex items-baseline gap-2 mb-4">
-          <span className="text-dm-gold font-semibold text-lg">
-            R$ {Number(product.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-          </span>
+          <div>
+            <span className="text-dm-gold font-semibold text-lg">
+              R$ {Number(product.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </span>
+            <p className="text-[9px] tracking-[0.18em] uppercase text-dm-muted">Varejo</p>
+            {wholesalePrice && (
+              <p className="mt-1 text-[11px] text-green-400">
+                Atacado: {wholesalePrice}
+              </p>
+            )}
+          </div>
           {hasOff && (
             <span className="text-dm-muted text-xs line-through">
               R$ {Number(product.price_original).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -76,7 +109,7 @@ export default function ProductCard({ product }) {
 
         {/* Sizes */}
         <div className="flex flex-wrap gap-1.5 mb-4">
-          {SIZES.map(s => (
+          {availableSizes.map(s => (
             <button
               key={s}
               onClick={() => setSize(s)}

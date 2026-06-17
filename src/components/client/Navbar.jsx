@@ -50,12 +50,15 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsOpen(true)}
-            className="relative p-2 text-dm-white/70 hover:text-dm-gold transition-colors"
+            className="relative inline-flex items-center gap-2 border border-dm-gold/45 bg-dm-gold/10 px-3.5 py-2.5 text-dm-gold shadow-[0_10px_30px_rgba(201,168,76,0.12)] transition-all hover:-translate-y-0.5 hover:border-dm-gold hover:bg-dm-gold hover:text-dm-black md:px-4"
             aria-label="Carrinho"
           >
-            <ShoppingBag size={20} />
+            <ShoppingBag size={22} />
+            <span className="hidden sm:inline text-[10px] tracking-[0.18em] uppercase font-semibold">
+              Carrinho
+            </span>
             {count > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] flex items-center justify-center font-bold bg-dm-gold text-dm-black">
+              <span className="absolute -top-2 -right-2 min-w-6 h-6 px-1 rounded-full text-[10px] flex items-center justify-center font-bold bg-red-500 text-white ring-2 ring-dm-black">
                 {count > 9 ? '9+' : count}
               </span>
             )}

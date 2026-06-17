@@ -5,7 +5,8 @@ import { deleteImage } from '../../lib/storage'
 import ImageUpload from '../shared/ImageUpload'
 import toast from 'react-hot-toast'
 
-const BLANK = { title: '', description: '', price: '', price_original: '', category: '', image_url: '', active: true }
+const AVAILABLE_SIZES = ['P', 'M', 'G', 'GG', 'XGG']
+const BLANK = { title: '', description: '', price: '', price_wholesale: '', price_original: '', category: '', image_url: '', sizes: [], active: true }
 const CATEGORIES = ['Oversized', 'Polos Premium', 'Camisetas', 'Calças', 'Acessórios', 'Outros']
 
 export default function ProductsPage() {
@@ -37,9 +38,11 @@ export default function ProductsPage() {
       title:          p.title         || '',
       description:    p.description   || '',
       price:          String(p.price) || '',
+      price_wholesale: p.price_wholesale ? String(p.price_wholesale) : '',
       price_original: p.price_original ? String(p.price_original) : '',
       category:       p.category      || '',
       image_url:      p.image_url     || '',
+      sizes:          Array.isArray(p.sizes) ? p.sizes : [],
       active:         p.active !== false,
     })
     setModal(true)
@@ -52,9 +55,22 @@ export default function ProductsPage() {
     setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }))
   }
 
+  function handleSizeToggle(size) {
+    setForm(f => {
+      const sizes = Array.isArray(f.sizes) ? f.sizes : []
+      return {
+        ...f,
+        sizes: sizes.includes(size)
+          ? sizes.filter(item => item !== size)
+          : [...sizes, size],
+      }
+    })
+  }
+
   async function handleSave() {
     if (!form.title.trim())         { toast.error('Informe o título');    return }
     if (!form.price || isNaN(Number(form.price))) { toast.error('Informe um preço válido'); return }
+    if (!form.sizes.length) { toast.error('Selecione pelo menos um tamanho disponível'); return }
 
     setSaving(true)
     try {
@@ -62,9 +78,11 @@ export default function ProductsPage() {
         title:          form.title.trim(),
         description:    form.description.trim(),
         price:          Number(form.price),
+        price_wholesale: form.price_wholesale ? Number(form.price_wholesale) : null,
         price_original: form.price_original ? Number(form.price_original) : null,
         category:       form.category.trim(),
         image_url:      form.image_url,
+        sizes:          form.sizes,
         active:         form.active,
       }
 
@@ -126,7 +144,7 @@ export default function ProductsPage() {
                 <tr>
                   <th>Produto</th>
                   <th className="hidden sm:table-cell">Categoria</th>
-                  <th>Preço</th>
+                  <th>Preços</th>
                   <th className="hidden md:table-cell">Status</th>
                   <th></th>
                 </tr>
@@ -150,12 +168,18 @@ export default function ProductsPage() {
                           {p.description && (
                             <p className="text-[10px] text-dm-muted truncate max-w-[180px]">{p.description}</p>
                           )}
+                          {Array.isArray(p.sizes) && p.sizes.length > 0 && (
+                            <p className="text-[10px] text-dm-gold mt-0.5">Tamanhos: {p.sizes.join(', ')}</p>
+                          )}
                         </div>
                       </div>
                     </td>
                     <td className="hidden sm:table-cell text-dm-muted text-[11px]">{p.category || '—'}</td>
                     <td>
-                      <p className="text-dm-gold text-[13px]">R$ {Number(p.price).toFixed(2)}</p>
+                      <p className="text-dm-gold text-[13px]">Varejo: R$ {Number(p.price).toFixed(2)}</p>
+                      {p.price_wholesale && (
+                        <p className="text-green-400 text-[10px]">Atacado: R$ {Number(p.price_wholesale).toFixed(2)}</p>
+                      )}
                       {p.price_original && (
                         <p className="text-dm-muted text-[10px] line-through">R$ {Number(p.price_original).toFixed(2)}</p>
                       )}
@@ -216,10 +240,38 @@ export default function ProductsPage() {
                 <textarea name="description" value={form.description} onChange={handleChange} rows={3} className="dm-input resize-none" placeholder="Descrição do produto..." />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="dm-label">Tamanhos disponíveis *</label>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                  {AVAILABLE_SIZES.map(size => (
+                    <label
+                      key={size}
+                      className={`flex items-center justify-center gap-2 border px-3 py-2 text-[10px] font-medium cursor-pointer transition-colors ${
+                        form.sizes.includes(size)
+                          ? 'border-dm-gold text-dm-gold bg-dm-gold/10'
+                          : 'border-dm-border text-dm-muted hover:border-dm-gold/60 hover:text-dm-white'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={form.sizes.includes(size)}
+                        onChange={() => handleSizeToggle(size)}
+                        className="w-3.5 h-3.5 accent-dm-gold"
+                      />
+                      {size}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="dm-label">Preço (R$) *</label>
+                  <label className="dm-label">Preço varejo (R$) *</label>
                   <input name="price" type="number" step="0.01" min="0" value={form.price} onChange={handleChange} className="dm-input" placeholder="0.00" inputMode="decimal" />
+                </div>
+                <div>
+                  <label className="dm-label">Preço atacado (R$)</label>
+                  <input name="price_wholesale" type="number" step="0.01" min="0" value={form.price_wholesale} onChange={handleChange} className="dm-input" placeholder="0.00" inputMode="decimal" />
                 </div>
                 <div>
                   <label className="dm-label">Preço original (opcional)</label>
