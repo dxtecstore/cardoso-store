@@ -6,12 +6,12 @@ export function CartProvider({ children }) {
   const [items,   setItems]   = useState([])
   const [isOpen,  setIsOpen]  = useState(false)
 
-  const addItem = useCallback((product, size) => {
+  const addItem = useCallback((product, size, color = '') => {
     setItems(prev => {
-      const key     = `${product.id}__${size}`
+      const key     = `${product.id}__${color}__${size}`
       const existing = prev.find(i => i.key === key)
       if (existing) return prev.map(i => i.key === key ? { ...i, qty: i.qty + 1 } : i)
-      return [...prev, { key, product, size, qty: 1 }]
+      return [...prev, { key, product, size, color, qty: 1 }]
     })
     setIsOpen(true)
   }, [])

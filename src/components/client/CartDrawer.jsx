@@ -88,6 +88,7 @@ export default function CartDrawer() {
           id: i.product.id,
           title: i.product.title,
           price: i.product.price,
+          color: i.color,
           size: i.size,
           qty: i.qty,
         })),
@@ -152,6 +153,9 @@ export default function CartDrawer() {
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="text-[13px] font-medium leading-snug">{item.product.title}</p>
+                      {item.color && (
+                        <p className="text-[10px] text-dm-muted mt-0.5">Cor: {item.color}</p>
+                      )}
                       <p className="text-[10px] text-dm-muted mt-0.5">Tamanho: {item.size}</p>
                       <p className="text-dm-gold text-[13px] mt-1">
                         R$ {(Number(item.product.price) * item.qty).toFixed(2)}
@@ -203,7 +207,7 @@ export default function CartDrawer() {
               <div className="border-t border-dm-border pt-4 space-y-1">
                 {items.map(i => (
                   <div key={i.key} className="flex justify-between text-[10px] text-dm-muted py-0.5">
-                    <span>{i.product.title} ({i.size}) x{i.qty}</span>
+                    <span>{i.product.title}{i.color ? ` - ${i.color}` : ''} ({i.size}) x{i.qty}</span>
                     <span>R$ {(Number(i.product.price) * i.qty).toFixed(2)}</span>
                   </div>
                 ))}

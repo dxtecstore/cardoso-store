@@ -7,7 +7,7 @@ import toast from 'react-hot-toast'
 
 const CLOTHING_SIZES = ['P', 'M', 'G', 'GG', 'XGG']
 const SHOE_SIZES = ['34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44']
-const BLANK = { title: '', description: '', price: '', price_wholesale: '', price_original: '', category: '', image_url: '', image_urls: ['', '', ''], sizes: [], active: true }
+const BLANK = { title: '', description: '', price: '', price_wholesale: '', price_original: '', category: '', image_url: '', image_urls: ['', '', ''], color_variants: [], sizes: [], active: true }
 const CATEGORIES = ['Oversized', 'Polos Premium', 'Camisetas', 'Calças', 'Acessórios', 'Outros']
 
 export default function ProductsPage() {
@@ -37,6 +37,12 @@ export default function ProductsPage() {
     const images = Array.isArray(p.image_urls) && p.image_urls.length > 0
       ? p.image_urls
       : [p.image_url].filter(Boolean)
+    const colorVariants = Array.isArray(p.color_variants)
+      ? p.color_variants.map(variant => ({
+          color: variant.color || '',
+          images: [...(Array.isArray(variant.images) ? variant.images : []), '', '', ''].slice(0, 3),
+        }))
+      : []
 
     setEditing(p)
     setForm({
@@ -48,6 +54,7 @@ export default function ProductsPage() {
       category:       p.category      || '',
       image_url:      p.image_url     || '',
       image_urls:     [...images, '', '', ''].slice(0, 3),
+      color_variants: colorVariants,
       sizes:          Array.isArray(p.sizes) ? p.sizes : [],
       active:         p.active !== false,
     })
@@ -86,6 +93,45 @@ export default function ProductsPage() {
     })
   }
 
+  function addColorVariant() {
+    setForm(f => ({
+      ...f,
+      color_variants: [
+        ...(Array.isArray(f.color_variants) ? f.color_variants : []),
+        { color: '', images: ['', '', ''] },
+      ],
+    }))
+  }
+
+  function removeColorVariant(index) {
+    setForm(f => ({
+      ...f,
+      color_variants: (Array.isArray(f.color_variants) ? f.color_variants : [])
+        .filter((_, itemIndex) => itemIndex !== index),
+    }))
+  }
+
+  function handleColorName(index, color) {
+    setForm(f => ({
+      ...f,
+      color_variants: (Array.isArray(f.color_variants) ? f.color_variants : []).map((variant, itemIndex) =>
+        itemIndex === index ? { ...variant, color } : variant
+      ),
+    }))
+  }
+
+  function handleColorImage(variantIndex, imageIndex, url) {
+    setForm(f => ({
+      ...f,
+      color_variants: (Array.isArray(f.color_variants) ? f.color_variants : []).map((variant, itemIndex) => {
+        if (itemIndex !== variantIndex) return variant
+        const images = [...(Array.isArray(variant.images) ? variant.images : ['', '', ''])]
+        images[imageIndex] = url
+        return { ...variant, images: [...images, '', '', ''].slice(0, 3) }
+      }),
+    }))
+  }
+
   async function handleSave() {
     if (!form.title.trim())         { toast.error('Informe o título');    return }
     if (!form.price || isNaN(Number(form.price))) { toast.error('Informe um preço válido'); return }
@@ -93,6 +139,14 @@ export default function ProductsPage() {
 
     setSaving(true)
     try {
+      const colorVariants = form.color_variants
+        .map(variant => ({
+          color: variant.color.trim(),
+          images: variant.images.filter(Boolean).slice(0, 3),
+        }))
+        .filter(variant => variant.color || variant.images.length > 0)
+      const firstColorImage = colorVariants.flatMap(variant => variant.images)[0]
+
       const payload = {
         title:          form.title.trim(),
         description:    form.description.trim(),
@@ -100,8 +154,9 @@ export default function ProductsPage() {
         price_wholesale: form.price_wholesale ? Number(form.price_wholesale) : null,
         price_original: form.price_original ? Number(form.price_original) : null,
         category:       form.category.trim(),
-        image_url:      form.image_urls.find(Boolean) || form.image_url,
+        image_url:      form.image_urls.find(Boolean) || firstColorImage || form.image_url,
         image_urls:     form.image_urls.filter(Boolean).slice(0, 3),
+        color_variants: colorVariants,
         sizes:          form.sizes,
         active:         form.active,
       }
@@ -136,6 +191,7 @@ export default function ProductsPage() {
     try {
       const images = Array.from(new Set([
         ...(Array.isArray(p.image_urls) ? p.image_urls : []),
+        ...(Array.isArray(p.color_variants) ? p.color_variants.flatMap(variant => variant.images || []) : []),
         p.image_url,
       ].filter(Boolean)))
       await Promise.all(images.map(url => deleteImage(url)))
@@ -259,6 +315,60 @@ export default function ProductsPage() {
                     />
                   ))}
                 </div>
+              </div>
+
+              <div className="border border-dm-border p-4">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <div>
+                    <p className="dm-label mb-0">Cores do Produto</p>
+                    <p className="text-[10px] text-dm-muted mt-1">Cada cor pode ter até 3 fotos.</p>
+                  </div>
+                  <button type="button" onClick={addColorVariant} className="dm-btn-ghost text-[9px] px-3 py-2">
+                    <Plus size={12} /> Adicionar cor
+                  </button>
+                </div>
+
+                {form.color_variants.length === 0 ? (
+                  <p className="text-[11px] text-dm-muted">Nenhuma cor cadastrada. Use se o mesmo produto tiver fotos por cor.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {form.color_variants.map((variant, variantIndex) => (
+                      <div key={variantIndex} className="border border-dm-border/70 p-3">
+                        <div className="flex items-start gap-2 mb-3">
+                          <div className="flex-1">
+                            <label className="dm-label">Nome da cor</label>
+                            <input
+                              value={variant.color}
+                              onChange={e => handleColorName(variantIndex, e.target.value)}
+                              className="dm-input"
+                              placeholder="Ex: Preto, Branco, Azul"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeColorVariant(variantIndex)}
+                            className="mt-6 p-2 text-dm-muted hover:text-red-400"
+                            title="Remover cor"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          {[0, 1, 2].map(imageIndex => (
+                            <ImageUpload
+                              key={imageIndex}
+                              currentUrl={variant.images?.[imageIndex] || ''}
+                              onUploaded={url => handleColorImage(variantIndex, imageIndex, url)}
+                              folder="products"
+                              label={`Foto ${imageIndex + 1}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div>

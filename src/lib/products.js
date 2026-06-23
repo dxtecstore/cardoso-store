@@ -7,6 +7,7 @@ function splitProductPayload(product) {
     price_wholesale,
     sizes,
     image_urls,
+    color_variants,
     ...base
   } = product
 
@@ -14,6 +15,14 @@ function splitProductPayload(product) {
     price_wholesale: price_wholesale ?? null,
     sizes: Array.isArray(sizes) ? sizes : [],
     image_urls: Array.isArray(image_urls) ? image_urls.filter(Boolean).slice(0, 3) : [],
+    color_variants: Array.isArray(color_variants)
+      ? color_variants
+          .map(variant => ({
+            color: String(variant.color || '').trim(),
+            images: Array.isArray(variant.images) ? variant.images.filter(Boolean).slice(0, 3) : [],
+          }))
+          .filter(variant => variant.color || variant.images.length > 0)
+      : [],
   }
 
   return { base, extras }

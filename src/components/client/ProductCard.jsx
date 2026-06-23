@@ -12,13 +12,19 @@ export default function ProductCard({ product }) {
   const [size, setSize] = useState('')
   const [adding, setAdding] = useState(false)
   const [imageIndex, setImageIndex] = useState(0)
+  const [colorIndex, setColorIndex] = useState(0)
 
   const isNew   = Date.now() - new Date(product.created_at).getTime() < 14 * 86400_000
   const hasOff  = product.price_original && product.price_original > product.price
   const offPct  = hasOff ? Math.round((1 - product.price / product.price_original) * 100) : 0
   const availableSizes = Array.isArray(product.sizes) && product.sizes.length > 0 ? product.sizes : SIZES
+  const colorVariants = Array.isArray(product.color_variants)
+    ? product.color_variants.filter(variant => variant.color || variant.images?.length)
+    : []
+  const selectedColor = colorVariants[colorIndex]
   const productImages = Array.from(new Set([
-    ...(Array.isArray(product.image_urls) ? product.image_urls : []),
+    ...(selectedColor?.images?.length ? selectedColor.images : []),
+    ...(!selectedColor && Array.isArray(product.image_urls) ? product.image_urls : []),
     product.image_url,
   ].filter(Boolean))).slice(0, 3)
   const mainImage = productImages[imageIndex] || productImages[0] || ''
@@ -26,7 +32,7 @@ export default function ProductCard({ product }) {
   async function handleAdd() {
     if (!size) { toast.error('Selecione um tamanho'); return }
     setAdding(true)
-    addItem(product, size)
+    addItem({ ...product, image_url: mainImage }, size, selectedColor?.color || '')
     toast.success(`${product.title} adicionado!`)
     setTimeout(() => setAdding(false), 600)
   }
@@ -41,6 +47,7 @@ export default function ProductCard({ product }) {
     '',
     `*${product.title}*`,
     product.category ? `Categoria: ${product.category}` : null,
+    selectedColor?.color ? `Cor escolhida: ${selectedColor.color}` : null,
     size ? `Tamanho escolhido: ${size}` : null,
     `Preço varejo: ${price}`,
     wholesalePrice ? `Preço atacado: ${wholesalePrice}` : null,
@@ -131,6 +138,27 @@ export default function ProductCard({ product }) {
             </span>
           )}
         </div>
+
+        {colorVariants.length > 0 && (
+          <div className="mb-4">
+            <p className="text-[9px] tracking-[0.18em] uppercase text-dm-muted mb-2">Cor</p>
+            <div className="flex flex-wrap gap-1.5">
+              {colorVariants.map((variant, index) => (
+                <button
+                  key={`${variant.color}-${index}`}
+                  type="button"
+                  onClick={() => {
+                    setColorIndex(index)
+                    setImageIndex(0)
+                  }}
+                  className={`dm-size ${colorIndex === index ? 'active' : ''}`}
+                >
+                  {variant.color || `Cor ${index + 1}`}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Sizes */}
         <div className="flex flex-wrap gap-1.5 mb-4">
