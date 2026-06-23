@@ -4,7 +4,7 @@ import { useCart }     from '../../context/CartContext'
 import { useSettings } from '../../context/SettingsContext'
 import toast from 'react-hot-toast'
 
-const SIZES = ['P', 'M', 'G', 'GG', 'XGG']
+const DEFAULT_SIZES = ['P', 'M', 'G', 'GG', 'XGG', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44']
 
 export default function ProductCard({ product }) {
   const { addItem }   = useCart()
@@ -17,7 +17,7 @@ export default function ProductCard({ product }) {
   const isNew   = Date.now() - new Date(product.created_at).getTime() < 14 * 86400_000
   const hasOff  = product.price_original && product.price_original > product.price
   const offPct  = hasOff ? Math.round((1 - product.price / product.price_original) * 100) : 0
-  const availableSizes = Array.isArray(product.sizes) && product.sizes.length > 0 ? product.sizes : SIZES
+  const availableSizes = Array.isArray(product.sizes) && product.sizes.length > 0 ? product.sizes : DEFAULT_SIZES
   const colorVariants = Array.isArray(product.color_variants)
     ? product.color_variants.filter(variant => variant.color || variant.images?.length)
     : []
