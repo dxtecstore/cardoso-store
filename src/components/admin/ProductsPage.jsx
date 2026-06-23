@@ -7,7 +7,7 @@ import toast from 'react-hot-toast'
 
 const CLOTHING_SIZES = ['P', 'M', 'G', 'GG', 'XGG']
 const SHOE_SIZES = ['34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44']
-const BLANK = { title: '', description: '', price: '', price_wholesale: '', price_original: '', category: '', image_url: '', sizes: [], active: true }
+const BLANK = { title: '', description: '', price: '', price_wholesale: '', price_original: '', category: '', image_url: '', image_urls: ['', '', ''], sizes: [], active: true }
 const CATEGORIES = ['Oversized', 'Polos Premium', 'Camisetas', 'Calças', 'Acessórios', 'Outros']
 
 export default function ProductsPage() {
@@ -34,6 +34,10 @@ export default function ProductsPage() {
   }
 
   function openEdit(p) {
+    const images = Array.isArray(p.image_urls) && p.image_urls.length > 0
+      ? p.image_urls
+      : [p.image_url].filter(Boolean)
+
     setEditing(p)
     setForm({
       title:          p.title         || '',
@@ -43,6 +47,7 @@ export default function ProductsPage() {
       price_original: p.price_original ? String(p.price_original) : '',
       category:       p.category      || '',
       image_url:      p.image_url     || '',
+      image_urls:     [...images, '', '', ''].slice(0, 3),
       sizes:          Array.isArray(p.sizes) ? p.sizes : [],
       active:         p.active !== false,
     })
@@ -68,6 +73,19 @@ export default function ProductsPage() {
     })
   }
 
+  function handleProductImage(index, url) {
+    setForm(f => {
+      const imageUrls = [...(Array.isArray(f.image_urls) ? f.image_urls : ['', '', ''])]
+      imageUrls[index] = url
+      const normalized = [...imageUrls, '', '', ''].slice(0, 3)
+      return {
+        ...f,
+        image_urls: normalized,
+        image_url: normalized.find(Boolean) || '',
+      }
+    })
+  }
+
   async function handleSave() {
     if (!form.title.trim())         { toast.error('Informe o título');    return }
     if (!form.price || isNaN(Number(form.price))) { toast.error('Informe um preço válido'); return }
@@ -82,7 +100,8 @@ export default function ProductsPage() {
         price_wholesale: form.price_wholesale ? Number(form.price_wholesale) : null,
         price_original: form.price_original ? Number(form.price_original) : null,
         category:       form.category.trim(),
-        image_url:      form.image_url,
+        image_url:      form.image_urls.find(Boolean) || form.image_url,
+        image_urls:     form.image_urls.filter(Boolean).slice(0, 3),
         sizes:          form.sizes,
         active:         form.active,
       }
@@ -115,7 +134,11 @@ export default function ProductsPage() {
   async function handleDelete(p) {
     if (!confirm(`Excluir "${p.title}"? Isso não pode ser desfeito.`)) return
     try {
-      if (p.image_url) await deleteImage(p.image_url)
+      const images = Array.from(new Set([
+        ...(Array.isArray(p.image_urls) ? p.image_urls : []),
+        p.image_url,
+      ].filter(Boolean)))
+      await Promise.all(images.map(url => deleteImage(url)))
       await deleteProduct(p.id)
       await load()
       toast.success('Produto excluído')
@@ -223,13 +246,20 @@ export default function ProductsPage() {
             </div>
 
             <div className="p-5 space-y-4">
-              {/* Image upload */}
-              <ImageUpload
-                currentUrl={form.image_url}
-                onUploaded={url => setForm(f => ({ ...f, image_url: url }))}
-                folder="products"
-                label="Foto do Produto"
-              />
+              <div>
+                <p className="dm-label">Fotos do Produto</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[0, 1, 2].map(index => (
+                    <ImageUpload
+                      key={index}
+                      currentUrl={form.image_urls[index] || ''}
+                      onUploaded={url => handleProductImage(index, url)}
+                      folder="products"
+                      label={`Foto ${index + 1}${index === 0 ? ' principal' : ''}`}
+                    />
+                  ))}
+                </div>
+              </div>
 
               <div>
                 <label className="dm-label">Título *</label>

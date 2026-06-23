@@ -6,12 +6,14 @@ function splitProductPayload(product) {
   const {
     price_wholesale,
     sizes,
+    image_urls,
     ...base
   } = product
 
   const extras = {
     price_wholesale: price_wholesale ?? null,
     sizes: Array.isArray(sizes) ? sizes : [],
+    image_urls: Array.isArray(image_urls) ? image_urls.filter(Boolean).slice(0, 3) : [],
   }
 
   return { base, extras }

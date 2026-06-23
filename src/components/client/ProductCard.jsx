@@ -11,11 +11,17 @@ export default function ProductCard({ product }) {
   const { settings }  = useSettings()
   const [size, setSize] = useState('')
   const [adding, setAdding] = useState(false)
+  const [imageIndex, setImageIndex] = useState(0)
 
   const isNew   = Date.now() - new Date(product.created_at).getTime() < 14 * 86400_000
   const hasOff  = product.price_original && product.price_original > product.price
   const offPct  = hasOff ? Math.round((1 - product.price / product.price_original) * 100) : 0
   const availableSizes = Array.isArray(product.sizes) && product.sizes.length > 0 ? product.sizes : SIZES
+  const productImages = Array.from(new Set([
+    ...(Array.isArray(product.image_urls) ? product.image_urls : []),
+    product.image_url,
+  ].filter(Boolean))).slice(0, 3)
+  const mainImage = productImages[imageIndex] || productImages[0] || ''
 
   async function handleAdd() {
     if (!size) { toast.error('Selecione um tamanho'); return }
@@ -50,9 +56,9 @@ export default function ProductCard({ product }) {
 
       {/* Image */}
       <div className="relative overflow-hidden">
-        {product.image_url ? (
+        {mainImage ? (
           <img
-            src={product.image_url}
+            src={mainImage}
             alt={product.title}
             className="dm-card-img"
             loading="lazy"
@@ -72,6 +78,25 @@ export default function ProductCard({ product }) {
         >
           <MessageCircle size={22} strokeWidth={2.4} />
         </a>
+        {productImages.length > 1 && (
+          <div className="absolute left-3 bottom-3 z-10 flex gap-1.5">
+            {productImages.map((url, index) => (
+              <button
+                key={url}
+                type="button"
+                onClick={() => setImageIndex(index)}
+                aria-label={`Ver foto ${index + 1} de ${product.title}`}
+                className={`h-9 w-7 overflow-hidden border transition-all ${
+                  imageIndex === index
+                    ? 'border-dm-gold opacity-100'
+                    : 'border-white/30 opacity-75 hover:opacity-100'
+                }`}
+              >
+                <img src={url} alt="" className="h-full w-full object-cover" loading="lazy" />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Info */}
