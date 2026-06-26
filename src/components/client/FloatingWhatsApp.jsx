@@ -1,9 +1,8 @@
 import { MessageCircle } from 'lucide-react'
-import { useSettings } from '../../context/SettingsContext'
+import { STORE_WHATSAPP } from '../../lib/whatsapp'
 
 export default function FloatingWhatsApp() {
-  const { settings } = useSettings()
-  const phone = settings.whatsapp || import.meta.env.VITE_WHATSAPP_NUMBER || '5591983181896'
+  const phone = STORE_WHATSAPP
   const message = encodeURIComponent(
     'Olá! Vim pelo site da Cardoso Store e gostaria de atendimento.'
   )

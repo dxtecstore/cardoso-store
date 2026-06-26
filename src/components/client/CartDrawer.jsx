@@ -3,10 +3,10 @@ import { X, Trash2, Plus, Minus, ShoppingBag } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
 import { useSettings } from '../../context/SettingsContext'
 import { createOrder } from '../../lib/orders'
+import { STORE_WHATSAPP } from '../../lib/whatsapp'
 import toast from 'react-hot-toast'
 
 const STEPS = { CART: 'cart', CHECKOUT: 'checkout', SUCCESS: 'success' }
-const STORE_WHATSAPP = '5591983181896'
 
 export default function CartDrawer() {
   const { items, total, isOpen, setIsOpen, removeItem, updateQty, clearCart } = useCart()

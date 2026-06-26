@@ -1,6 +1,24 @@
 import { supabase } from './supabase'
 
 const EXTRA_PREFIX = 'product_extra_'
+const LEGACY_SHOE_SIZE_PAIRS = {
+  '34': '35/36',
+  '35': '35/36',
+  '36': '35/36',
+  '37': '37/38',
+  '38': '37/38',
+  '39': '39/40',
+  '40': '39/40',
+  '41': '41/42',
+  '42': '41/42',
+  '43': '43/44',
+  '44': '43/44',
+}
+
+export function normalizeProductSizes(sizes) {
+  if (!Array.isArray(sizes)) return []
+  return [...new Set(sizes.map(size => LEGACY_SHOE_SIZE_PAIRS[String(size)] || String(size)))]
+}
 
 function splitProductPayload(product) {
   const {
@@ -13,7 +31,7 @@ function splitProductPayload(product) {
 
   const extras = {
     price_wholesale: price_wholesale ?? null,
-    sizes: Array.isArray(sizes) ? sizes : [],
+    sizes: normalizeProductSizes(sizes),
     image_urls: Array.isArray(image_urls) ? image_urls.filter(Boolean).slice(0, 3) : [],
     color_variants: Array.isArray(color_variants)
       ? color_variants
@@ -47,10 +65,14 @@ async function getProductExtras() {
 }
 
 function mergeProductExtras(products, extrasById) {
-  return (products ?? []).map(product => ({
-    ...product,
-    ...(extrasById[product.id] ?? {}),
-  }))
+  return (products ?? []).map(product => {
+    const extras = extrasById[product.id] ?? {}
+    return {
+      ...product,
+      ...extras,
+      sizes: normalizeProductSizes(extras.sizes ?? product.sizes),
+    }
+  })
 }
 
 async function saveProductExtras(productId, extras) {

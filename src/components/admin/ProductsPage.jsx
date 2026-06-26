@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, X, Eye, EyeOff } from 'lucide-react'
-import { getAllProducts, createProduct, updateProduct, deleteProduct } from '../../lib/products'
+import { getAllProducts, createProduct, updateProduct, deleteProduct, normalizeProductSizes } from '../../lib/products'
 import { deleteImage } from '../../lib/storage'
 import ImageUpload from '../shared/ImageUpload'
 import toast from 'react-hot-toast'
 
 const CLOTHING_SIZES = ['P', 'M', 'G', 'GG', 'XGG']
-const SHOE_SIZES = ['34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44']
+const SHOE_SIZES = ['35/36', '37/38', '39/40', '41/42', '43/44']
 const BLANK = { title: '', description: '', price: '', price_wholesale: '', price_original: '', category: '', image_url: '', image_urls: ['', '', ''], color_variants: [], sizes: [], active: true }
 const CATEGORIES = ['Oversized', 'Polos Premium', 'Camisetas', 'Calças', 'Acessórios', 'Outros']
 
@@ -55,7 +55,7 @@ export default function ProductsPage() {
       image_url:      p.image_url     || '',
       image_urls:     [...images, '', '', ''].slice(0, 3),
       color_variants: colorVariants,
-      sizes:          Array.isArray(p.sizes) ? p.sizes : [],
+      sizes:          normalizeProductSizes(p.sizes),
       active:         p.active !== false,
     })
     setModal(true)

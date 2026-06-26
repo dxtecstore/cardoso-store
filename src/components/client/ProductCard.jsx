@@ -1,14 +1,13 @@
 import { useState } from 'react'
 import { ShoppingBag, MessageCircle } from 'lucide-react'
 import { useCart }     from '../../context/CartContext'
-import { useSettings } from '../../context/SettingsContext'
 import toast from 'react-hot-toast'
+import { STORE_WHATSAPP } from '../../lib/whatsapp'
 
-const DEFAULT_SIZES = ['P', 'M', 'G', 'GG', 'XGG', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44']
+const DEFAULT_SIZES = ['P', 'M', 'G', 'GG', 'XGG', '35/36', '37/38', '39/40', '41/42', '43/44']
 
 export default function ProductCard({ product }) {
   const { addItem }   = useCart()
-  const { settings }  = useSettings()
   const [size, setSize] = useState('')
   const [adding, setAdding] = useState(false)
   const [imageIndex, setImageIndex] = useState(0)
@@ -37,7 +36,7 @@ export default function ProductCard({ product }) {
     setTimeout(() => setAdding(false), 600)
   }
 
-  const phone   = settings.whatsapp || import.meta.env.VITE_WHATSAPP_NUMBER || '5591983181896'
+  const phone   = STORE_WHATSAPP
   const price = Number(product.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
   const wholesalePrice = product.price_wholesale
     ? Number(product.price_wholesale).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })

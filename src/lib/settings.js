@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { STORE_WHATSAPP } from './whatsapp'
 
 /**
  * Retorna todas as configurações como objeto { key: value }
@@ -36,7 +37,7 @@ export async function setSettings(pairs) {
 export const SETTINGS_DEFAULTS = {
   store_name:  'Cardoso Store',
   logo_url:    '',
-  whatsapp:    '5591983181896',
+  whatsapp:    STORE_WHATSAPP,
   instagram:   'cardoso.store',
   hero_title:  'Vista Presença.',
   hero_sub:    'Moda premium multimarcas. Elegância em cada detalhe.',
